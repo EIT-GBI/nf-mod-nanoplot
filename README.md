@@ -5,9 +5,8 @@ QC plots and summary statistics). Used as a git submodule by pipelines.
 
 Image: `ghcr.io/eit-gbi/nf-mod-nanoplot:v0.0.0`
 
-Published for `linux/amd64` only — the conda aarch64 solve produces a NanoPlot
-that fails to import. On an arm64 host, run with
-`docker.runOptions = '--platform=linux/amd64'`.
+Published for `linux/amd64` only; the arm64 build is unverified. On an arm64
+host, run with `docker.runOptions = '--platform=linux/amd64'`.
 
 ## Processes
 
@@ -40,9 +39,19 @@ process {
 
 ## Pinned dependencies
 
-The image pins `python-kaleido<1.0` and `python=3.12`. NanoPlot's `nanoplotter`
-imports `kaleido.scopes.plotly`, which kaleido 1.x removed; an unpinned solve
-also drags in a Python release NanoPlot has never been tested against.
+Built on `debian:13-slim`, with NanoPlot installed by pip into a venv. Two
+upstream pins, both found by running NanoPlot rather than by checking
+`--version`:
+
+| Pin | Why |
+| --- | --- |
+| `kaleido<1.0` | `nanoplotter` imports `kaleido.scopes.plotly`, removed in 1.x |
+| `plotly<6` | `nanoplotter` calls `figure_factory.create_2d_density`, removed in 6.x |
+
+**Known upstream limitation:** `report.stats2html` parses `NanoStats.txt` with
+`sep=':'`, so a run whose read names contain colons dies with a pandas
+`ParserError` after the plots are written. Real ONT read names are UUIDs, but
+synthetic test data often is not.
 
 ## Use as submodule
 
