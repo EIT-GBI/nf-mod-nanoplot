@@ -3,7 +3,7 @@
 
 Nextflow module for nanoplot. Used as a git submodule by pipelines.
 
-Image: `ghcr.io/eit-gbi/nf-mod-nanoplot:latest`
+Image: `ghcr.io/eit-gbi/nf-mod-nanoplot:v0.0.0`
 
 ## Processes
 
@@ -18,3 +18,13 @@ Then in your pipeline:
 ```
 include { NANOPLOT } from './modules/nanoplot/main.nf'
 ```
+
+## Pinning
+
+Pipelines pin a release rather than tracking `main`:
+
+```bash
+git -C modules/nanoplot checkout v0.0.0
+```
+
+and pick up the matching image with `includeConfig 'modules/nanoplot/conf/module.config'`.
