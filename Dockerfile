@@ -23,6 +23,15 @@ RUN micromamba install -y -n base -c bioconda -c conda-forge \
         'python-kaleido<1.0' \
     && micromamba clean --all --yes
 
-ENV PATH=/opt/conda/bin:${PATH}
+ENV PATH=/opt/conda/bin:${PATH} \
+    LC_ALL=C.UTF-8
 
-CMD ["nanoplot"]
+LABEL org.opencontainers.image.title="NanoPlot" \
+    org.opencontainers.image.description="NanoPlot on mambaorg/micromamba" \
+    org.opencontainers.image.version="${NANOPLOT_VERSION}" \
+    org.opencontainers.image.source="https://github.com/wdecoster/NanoPlot" \
+    org.opencontainers.image.licenses="MIT"
+
+# No ENTRYPOINT: Nextflow invokes the container as `/bin/bash -c ...`, and an
+# ENTRYPOINT of ["NanoPlot"] turns that into `NanoPlot /bin/bash`, which fails.
+CMD ["NanoPlot", "--help"]

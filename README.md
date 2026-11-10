@@ -1,30 +1,82 @@
 # nf-mod-nanoplot
 
-
-Nextflow module for nanoplot. Used as a git submodule by pipelines.
+Nextflow module for [NanoPlot](https://github.com/wdecoster/NanoPlot) (long-read
+QC plots and summary statistics). Used as a git submodule by pipelines.
 
 Image: `ghcr.io/eit-gbi/nf-mod-nanoplot:v0.0.0`
 
+Published for `linux/amd64` only — the conda aarch64 solve produces a NanoPlot
+that fails to import. On an arm64 host, run with
+`docker.runOptions = '--platform=linux/amd64'`.
+
 ## Processes
 
-- `NANOPLOT` — TODO: describe inputs/outputs
+| Process | Path | Inputs | Emits |
+| --- | --- | --- | --- |
+| `NANOPLOT_NANOPLOT` | `nanoplot/main.nf` | `tuple val(meta), path(bam), path(bai)` | `report` |
+
+`report` is a directory named after `meta.id`, holding the HTML report and its
+plots. Those files embed a generation timestamp, so the directory is not a
+stable thing to checksum in a test — assert on the summary statistics instead.
+
+## Publishing
+
+This process publishes to `${params.outdir}/qc/nanoplot`. Pipelines that want a
+different layout override `publishDir` with a `withName` selector.
+
+## Tool arguments
+
+Flags are passed through `task.ext.args` rather than read from pipeline
+`params`, so the module never depends on a particular pipeline's parameter
+names:
+
+```groovy
+process {
+    withName: NANOPLOT_NANOPLOT {
+        ext.args = '--plots dot --N50'
+    }
+}
+```
+
+## Pinned dependencies
+
+The image pins `python-kaleido<1.0` and `python=3.12`. NanoPlot's `nanoplotter`
+imports `kaleido.scopes.plotly`, which kaleido 1.x removed; an unpinned solve
+also drags in a Python release NanoPlot has never been tested against.
 
 ## Use as submodule
-```bash
-git submodule add https://github.com/eit-gbi/nf-mod-nanoplot.git modules/nanoplot
-```
 
-Then in your pipeline:
-```
-include { NANOPLOT } from './modules/nanoplot/main.nf'
-```
-
-## Pinning
-
-Pipelines pin a release rather than tracking `main`:
+Pin to a release tag rather than a branch, so pipeline runs stay reproducible:
 
 ```bash
+git submodule add https://github.com/EIT-GBI/nf-mod-nanoplot.git modules/nanoplot
 git -C modules/nanoplot checkout v0.0.0
 ```
 
-and pick up the matching image with `includeConfig 'modules/nanoplot/conf/module.config'`.
+Then include the module's container config from your `nextflow.config`. Nextflow
+does not read a submodule's config on its own, so without this line the
+process has no image:
+
+```groovy
+includeConfig 'modules/nanoplot/conf/module.config'
+```
+
+`conf/module.config` pins the image to the version built from this same commit,
+and carries no `manifest {}` block, so it will not overwrite your pipeline's
+own manifest. Override it in your pipeline with a `withName` selector if needed.
+
+And include the process:
+
+```groovy
+include { NANOPLOT_NANOPLOT } from './modules/nanoplot/nanoplot/main.nf'
+```
+
+## Requirements
+
+Nextflow 26.04.4 or newer.
+
+## Releasing
+
+Merging a PR to `main` with exactly one `bump:patch`, `bump:minor` or
+`bump:major` label bumps `manifest.version` in `nextflow.config`, tags the
+release and publishes the container image.
