@@ -3,7 +3,6 @@
 process NANOPLOT_NANOPLOT {
     tag "${meta.id}"
 
-    publishDir "${params.outdir}/qc/nanoplot", mode: 'copy'
 
     input:
     tuple val(meta), path(bam), path(bai)

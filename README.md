@@ -20,8 +20,9 @@ stable thing to checksum in a test — assert on the summary statistics instead.
 
 ## Publishing
 
-This process publishes to `${params.outdir}/qc/nanoplot`. Pipelines that want a
-different layout override `publishDir` with a `withName` selector.
+This process does **not** publish its own outputs. Publishing is the consuming
+pipeline's job, via a workflow `output {}` block. This keeps the module
+reusable across pipelines that want different result layouts.
 
 ## Tool arguments
 
