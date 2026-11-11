@@ -3,7 +3,7 @@
 Nextflow module for [NanoPlot](https://github.com/wdecoster/NanoPlot) (long-read
 QC plots and summary statistics). Used as a git submodule by pipelines.
 
-Image: `ghcr.io/eit-gbi/nf-mod-nanoplot:v1.0.0`
+Image: `ghcr.io/eit-gbi/nf-mod-nanoplot:v2.0.0`
 
 Published for `linux/amd64` only; the arm64 build is unverified. On an arm64
 host, run with `docker.runOptions = '--platform=linux/amd64'`.
@@ -60,7 +60,7 @@ Pin to a release tag rather than a branch, so pipeline runs stay reproducible:
 
 ```bash
 git submodule add https://github.com/EIT-GBI/nf-mod-nanoplot.git modules/nanoplot
-git -C modules/nanoplot checkout v1.0.0
+git -C modules/nanoplot checkout v2.0.0
 ```
 
 Then include the module's container config from your `nextflow.config`. Nextflow
